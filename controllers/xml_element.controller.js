@@ -4,169 +4,27 @@ require("dotenv").config();
 const joi = require("joi");
 const { isValidObjectId, Types } = require("mongoose");
 
-exports.createRoot = async (req, res) => {
+exports.create = async (req, res) => {
   //input validation
   const { error } = xmlElementValidation(req.body);
   if (error) {
     return error.details[0].message;
   }
-  var root = await XmlElement.findOne({ parent_id: null });
-  if (root) {
-    res
-      .send({ success: false, message: "root element  already exists " })
-      .status(409);
-  } else {
-    try {
-      const rootElement = await XmlElement.create({
-        name: req.body.name,
-        type: null,
-        levelH: 0,
-        parent_id: null,
-        attribute_id: null,
-      });
-      res.status(200).send({
-        success: true,
-        message: "root element is  created  succesfully ",
-        data: rootElement,
-      });
-    } catch {
-      res.status(500).send({
-        success: false,
-        error: "some error occure while creating new rootElement   ",
-      });
-    }
-  }
-};
-//start from the root element , without attributes
-const getAllElements = async () => {
-  const xmlElements = await XmlElement.find();
-  const elements = [];
-  const root = await XmlElement.findOne({ parent_id: null });
-  if (root) {
-    elements.push(root._id.toString());
-  }
-  xmlElements.forEach(async (element) => {
-    element.childrens.forEach((e) => {
-      elements.push(e.toString());
-    });
-  });
-  return elements;
-};
-exports.createAttribute = async (req, res) => {
-  const { error } = xmlElementValidation(req.body);
-  if (error) {
-    res.send({ error: error.details[0].message }).status(400);
-  }
-  if (!isValidObjectId(req.params.id)) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Invalid ID format." });
-  }
-  try {
-    var parent = await XmlElement.findOne({
-      _id: req.params.id,
-    }).exec();
 
-    if (!parent) {
-      res.status(409).send({ success: false, message: "Parent not found." });
-    } else {
-      // check if parent is valid element or not
-      const elements = await getAllElements();
-      if (!elements.includes(parent._id.toString())) {
-        return res
-          .status(400)
-          .send({ success: false, message: "not valid parent " });
-      }
-      const attributeElement = await XmlElement.create({
-        name: req.body.name,
-        type: req.body.type,
-        value: req.body.value,
-        levelH: 0,
-        parent_id: parent._id,
-      });
-      parent.attribute_id = attributeElement._id;
-      await parent.save();
-      res.status(200).send({
-        success: true,
-        message: "attribute  element is  created  succesfully ",
-        data: attributeElement,
-      });
-    }
-  } catch (err) {
-    console.error("Error:", err);
+  try {
+    const element = await XmlElement.create({
+      name: req.body.name,
+      type: req.body.type,
+    });
+    res.status(200).send({
+      success: true,
+      message: "element is  created  succesfully .",
+      data: element,
+    });
+  } catch {
     res.status(500).send({
       success: false,
-      error: "An error occurred while processing the request.",
-    });
-  }
-};
-exports.createElement = async (req, res) => {
-  const { error } = xmlElementValidation(req.body);
-  if (error) {
-    res.send({ error: error.details[0].message }).status(400);
-  }
-  if (!isValidObjectId(req.params.id)) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Invalid ID format." });
-  }
-  try {
-    const elements = await getAllElements();
-    console.log(elements);
-    // is valid xml element or root element
-
-    var parent = await XmlElement.findOne({
-      _id: req.params.id,
-    }).exec();
-
-    if (!parent) {
-      res.status(409).send({ success: false, message: "Not Found Parent ." });
-    } else {
-      if (!elements.includes(parent._id.toString())) {
-        return res
-          .status(400)
-          .send({ success: false, message: "Invalid parent ." });
-      }
-      const element = await XmlElement.create({
-        name: req.body.name,
-        type: req.body.type,
-        value: req.body.value,
-        parent_id: parent._id,
-      });
-
-      if (!req.body.lavelH) {
-        console.log("construct");
-        const count = parent.childrens.length;
-        element.levelH = count + 1;
-      } else {
-        console.log("input");
-        for (
-          let index = req.body.lavelH - 1;
-          index < parent.childrens.length;
-          index++
-        ) {
-          const child = await XmlElement.findById(parent.childrens[index]);
-          child.lavelH++;
-          await child.save();
-        }
-
-        element.lavelH = req.body.lavelH;
-      }
-
-      await element.save();
-      await parent.childrens.slice(element._id, element.lavelH);
-      await parent.save();
-      res.status(200).send({
-        success: true,
-        message: "xml element is  created  succesfully ",
-        data: element,
-      });
-    }
-  } catch (err) {
-    console.error("Error:", err);
-    res.status(500).send({
-      success: false,
-      error: "An error occurred while processing the request.",
+      error: "some error occure while creating new rootElement .",
     });
   }
 };
@@ -175,31 +33,11 @@ exports.getAll = async (req, res) => {
   const elements = await XmlElement.find();
   res.send({
     success: true,
+    message: "Get All Elements .",
     data: elements,
   });
 };
-exports.getChildrens = async (req, res) => {
-  if (!isValidObjectId(req.params.id)) {
-    return res
-      .status(400)
-      .send({ success: false, message: "Invalid ID format." });
-  }
-  const parent = await XmlElement.findOne({ _id: req.params.id });
-  if (parent) {
-    const childrens = [];
-    for (const id of parent.childrens) {
-      const element = await XmlElement.findOne({ _id: id });
-      childrens.push(element);
-    }
-    console.log(childrens);
-    res.send({
-      success: true,
-      data: childrens,
-    });
-  } else {
-    res.status(404).send({ success: false, message: "Parent not found." });
-  }
-};
+
 exports.update = async (req, res) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -207,12 +45,10 @@ exports.update = async (req, res) => {
         .status(400)
         .send({ success: false, message: "Invalid ID format." });
     }
-    const { name, type, value, lavelH, attribute_id, parent_id } = req.body;
+    const { name, type } = req.body;
     const element = await XmlElement.findByIdAndUpdate(req.params.id, {
       name,
       type,
-      value,
-      lavelH,
     });
 
     if (!element) {
@@ -226,43 +62,16 @@ exports.update = async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
-const deleteElementAndChildren = async (elementId) => {
-  const element = await XmlElement.findById(elementId);
-  if (!element) {
-    return;
-  }
 
-  // Delete children recursively
-  for (const childId of element.childrens) {
-    await deleteElementAndChildren(childId);
-  }
-
-  // Delete the element itself
-  await XmlElement.findByIdAndDelete(elementId);
-};
-
-exports.deleteElement = async (req, res) => {
+exports.delete = async (req, res) => {
   try {
-    const element = await XmlElement.findById(req.params.id);
-
+    const element = await XmlElement.findByIdAndDelete(req.params.id);
     if (!element) {
       return res
         .status(404)
         .json({ success: false, message: "Element not found" });
     }
-
-    // Delete element and its children
-    await deleteElementAndChildren(req.params.id);
-    await deleteElementAndChildren(element.attribute_id);
-
-    // Optionally, you can remove the deleted element from its parent's childrens array.
-    if (element.parent_id) {
-      await XmlElement.findByIdAndUpdate(element.parent_id, {
-        $pull: { childrens: element._id },
-      });
-    }
-
-    res.json({ success: true, message: "Element and its children deleted" });
+    res.json({ success: true, message: "Element is Deleted" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
