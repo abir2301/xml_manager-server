@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const joi = require("joi");
+const FileSchemas = require("./fileSchema.model");
 
 const elementSchema = mongoose.Schema({
   name: {
@@ -13,22 +14,27 @@ const elementSchema = mongoose.Schema({
     default: null,
   },
 
-  // attribute_id: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "XmlElement",
-  //   required: false,
-  //   default: null,
-  // },
-  // parent_id: {
-  //   type: mongoose.Schema.Types.ObjectId,
-  //   ref: "XmlElement",
-  //   required: false,
-  // },
-  // childrens: {
-  //   type: [mongoose.Schema.Types.ObjectId],
-  //   ref: "XmlElement",
-  //   required: false,
-  // },
+  parent_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "XmlElement",
+    required: false,
+  },
+
+  schema_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "FileSchemas",
+    required: false,
+  },
+  is_attribute: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
+  lavelH: {
+    type: Number,
+    required: false,
+    default: 1,
+  },
 });
 function xmlElementValidation(element) {
   const schema = joi.object({
