@@ -9,6 +9,12 @@ app.use(bodyParser.json());
 app.get("/", (req, res) => {
   res.send(" heyy app ");
 });
+app.use(function (req, res, next) {
+  res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000"); // Replace with your frontend's URL
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
 app.listen(3001, () => {
   console.log("app run on port 3001");
 });

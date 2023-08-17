@@ -35,7 +35,7 @@ exports.create = async (req, res) => {
     const siblings = await XmlElement.find({
       parent_id: parent._id,
     }).sort({ lavelH: 1 });
-    if (element.lavelH < siblingWithMaxLavelH.lavelH) {
+    if (element.lavelH <= siblingWithMaxLavelH.lavelH) {
       siblings.forEach(async (element1) => {
         if (element1.lavelH > element.lavelH) {
           element1.lavelH = element.lavelH + 1;

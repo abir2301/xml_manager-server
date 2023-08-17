@@ -1,0 +1,222 @@
+{
+    "_id": "64c42b8d03ba1e53a0461885",
+    "name": "root",
+    "type": "root",
+    "parent_id": null,
+    "schema_id": "64c3c5180630e36b67af9136",
+    "is_attribute": false,
+    "lavelH": 0,
+    "__v": 0,
+    "childrens": [
+        {
+            "_id": "64c42c0b6fd3cf7e11a807a2",
+            "name": "xElement",
+            "type": "string",
+            "parent_id": "64c42b8d03ba1e53a0461885",
+            "schema_id": "64c3c5180630e36b67af9136",
+            "is_attribute": true,
+            "lavelH": 1,
+            "__v": 0,
+            "childrens": [],
+            "attribute": null
+        },
+        {
+            "_id": "64c42c286fd3cf7e11a807a6",
+            "name": "xElement1",
+            "type": "string",
+            "parent_id": "64c42b8d03ba1e53a0461885",
+            "schema_id": "64c3c5180630e36b67af9136",
+            "is_attribute": true,
+            "lavelH": 1,
+            "__v": 0,
+            "childrens": [],
+            "attribute": null
+        },
+        {
+            "_id": "64c42c2d6fd3cf7e11a807aa",
+            "name": "xElement2",
+            "type": "string",
+            "parent_id": "64c42b8d03ba1e53a0461885",
+            "schema_id": "64c3c5180630e36b67af9136",
+            "is_attribute": true,
+            "lavelH": 1,
+            "__v": 0,
+            "childrens": [
+                {
+                    "_id": "64c42c5c6fd3cf7e11a807bf",
+                    "name": "xElement2.1",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c42c606fd3cf7e11a807c3",
+                    "name": "xElement2.2",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c42c646fd3cf7e11a807c7",
+                    "name": "xElement2.3",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c44e4b3ab9e9f5590792c1",
+                    "name": "xElement2.4",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 2,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c45f101a973c5bc7b7b53c",
+                    "name": "xElement2.6",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 2,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c45f4f1a973c5bc7b7b55b",
+                    "name": "xElement2.HHHH",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 2,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c44e5e3ab9e9f5590792c9",
+                    "name": "xElement2.6",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 4,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c44e553ab9e9f5590792c5",
+                    "name": "xElement2.5",
+                    "type": "string",
+                    "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 5,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                }
+            ],
+            "attribute": {
+                "_id": "64c42c5c6fd3cf7e11a807bf",
+                "name": "xElement2.1",
+                "type": "string",
+                "parent_id": "64c42c2d6fd3cf7e11a807aa",
+                "schema_id": "64c3c5180630e36b67af9136",
+                "is_attribute": true,
+                "lavelH": 1,
+                "__v": 0
+            }
+        },
+        {
+            "_id": "64c42c316fd3cf7e11a807ae",
+            "name": "xElement4",
+            "type": "string",
+            "parent_id": "64c42b8d03ba1e53a0461885",
+            "schema_id": "64c3c5180630e36b67af9136",
+            "is_attribute": true,
+            "lavelH": 1,
+            "__v": 0,
+            "childrens": [
+                {
+                    "_id": "64c42c406fd3cf7e11a807b2",
+                    "name": "xElement4.1",
+                    "type": "string",
+                    "parent_id": "64c42c316fd3cf7e11a807ae",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c42c456fd3cf7e11a807b6",
+                    "name": "xElement4.2",
+                    "type": "string",
+                    "parent_id": "64c42c316fd3cf7e11a807ae",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                },
+                {
+                    "_id": "64c42c486fd3cf7e11a807ba",
+                    "name": "xElement4.3",
+                    "type": "string",
+                    "parent_id": "64c42c316fd3cf7e11a807ae",
+                    "schema_id": "64c3c5180630e36b67af9136",
+                    "is_attribute": true,
+                    "lavelH": 1,
+                    "__v": 0,
+                    "childrens": [],
+                    "attribute": null
+                }
+            ],
+            "attribute": {
+                "_id": "64c42c406fd3cf7e11a807b2",
+                "name": "xElement4.1",
+                "type": "string",
+                "parent_id": "64c42c316fd3cf7e11a807ae",
+                "schema_id": "64c3c5180630e36b67af9136",
+                "is_attribute": true,
+                "lavelH": 1,
+                "__v": 0
+            }
+        }
+    ],
+    "attribute": {
+        "_id": "64c42c0b6fd3cf7e11a807a2",
+        "name": "xElement",
+        "type": "string",
+        "parent_id": "64c42b8d03ba1e53a0461885",
+        "schema_id": "64c3c5180630e36b67af9136",
+        "is_attribute": true,
+        "lavelH": 1,
+        "__v": 0
+    }
+}
