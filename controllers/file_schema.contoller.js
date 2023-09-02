@@ -28,13 +28,44 @@ exports.create = async (req, res) => {
       .status(200);
   }
 };
+const getSchemaComposition = async (param) => {
+  const schema = await FileSchema.findOne({ _id: param._id });
+  if (!schema) {
+    return {};
+  }
+  const root = await XmlElement.findOne({
+    schema_id: schema._id,
+    parent_id: null,
+  });
+  if (!root) {
+    return {};
+  }
+  const composition = await getSchemaElementsRecursive(root._id);
+  let data = JSON.stringify(composition);
+  // const xmlData = convertToXml(composition);
+  return { composition };
+};
 exports.getAll = async (req, res) => {
   const schemas = await FileSchema.find();
+  const list = [];
+  for (i = 0; i < schemas.length; i++) {
+    const schema = schemas[i];
+    const content = await getSchemaComposition(schema);
+    const obj = {
+      _id: schema._id,
+      title: schema.title,
+      version: schema.version,
+      data: [content.composition],
+    };
+
+    list.push(obj);
+  }
+
   res
     .send({
       success: true,
       message: "schemas",
-      data: schemas,
+      data: list,
     })
     .status(200);
 };
@@ -54,12 +85,15 @@ const getSchemaElementsRecursive = async (elementId) => {
   });
   for (const element of subElements) {
     const child = await getSchemaElementsRecursive(element._id);
-    if (child) {
+    if (child != null) {
       childrens.push(child);
     }
   }
+  if (attribute !== null) {
+    childrens.push(attribute);
+  }
 
-  return { ...element.toObject(), childrens, attribute };
+  return { ...element.toObject(), childrens };
 };
 
 function convertToXml(jsonData) {
@@ -100,13 +134,14 @@ exports.getOne = async (req, res) => {
   }
   const composition = await getSchemaElementsRecursive(root._id);
   let data = JSON.stringify(composition);
-  const xmlData = convertToXml(composition);
-  console.log(xmlData);
+  // const xmlData = convertToXml(composition);
+  // console.log(xmlData);
   res.send({
     success: true,
     data: composition,
   });
 };
+
 exports.update = async (req, res) => {
   try {
     if (!isValidObjectId(req.params.id)) {
