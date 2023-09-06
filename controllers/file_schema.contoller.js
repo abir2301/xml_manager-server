@@ -3,30 +3,18 @@ const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
 require("dotenv").config();
 const { create } = require("xmlbuilder2");
-
 const fs = require("fs");
 const { isValidObjectId, Types } = require("mongoose");
 
 exports.create = async (req, res) => {
-  const schema = await FileSchema.findOne({ title: req.body.title });
-  if (schema) {
-    res
-      .send({
-        success: true,
-        message: "schema already is exist .",
-        data: schema,
-      })
-      .status(409);
-  } else {
-    const schemaX = await FileSchema.create({ title: req.body.title });
-    res
-      .send({
-        success: true,
-        message: "schema  is  created  succesfully .",
-        data: schemaX,
-      })
-      .status(200);
-  }
+  const schemaX = await FileSchema.create({ title: req.body.title });
+  res
+    .send({
+      success: true,
+      message: "schema  is  created  succesfully .",
+      data: schemaX,
+    })
+    .status(200);
 };
 const getSchemaComposition = async (param) => {
   const schema = await FileSchema.findOne({ _id: param._id });
@@ -79,18 +67,11 @@ const getSchemaElementsRecursive = async (elementId) => {
     parent_id: elementId,
   }).sort({ lavelH: 1 });
 
-  const attribute = await XmlElement.findOne({
-    parent_id: elementId,
-    is_attribute: 1,
-  });
   for (const element of subElements) {
     const child = await getSchemaElementsRecursive(element._id);
     if (child != null) {
       childrens.push(child);
     }
-  }
-  if (attribute !== null) {
-    childrens.push(attribute);
   }
 
   return { ...element.toObject(), childrens };

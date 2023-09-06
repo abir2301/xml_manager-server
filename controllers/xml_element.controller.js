@@ -19,6 +19,20 @@ exports.create = async (req, res) => {
         .status(404)
         .json({ success: false, message: " Parent Element not found" });
     }
+
+    const siblings = await XmlElement.find({
+      parent_id: parent._id,
+    }).sort({ lavelH: 1 });
+
+    if (req.body.is_attribute) {
+      const bool = await hasAttributeFn(parent._id, schema._id);
+      console.log("boooool" + bool);
+      if (bool) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Already Have An Attribute" });
+      }
+    }
     const element = await XmlElement.create({
       name: req.body.name,
       type: req.body.type,
@@ -27,14 +41,13 @@ exports.create = async (req, res) => {
       parent_id: parent._id,
       lavelH: req.body.lavelH,
     });
+
     const siblingWithMaxLavelH = await XmlElement.find({
       parent_id: parent._id,
     })
       .sort({ lavelH: -1 })
       .limit(1);
-    const siblings = await XmlElement.find({
-      parent_id: parent._id,
-    }).sort({ lavelH: 1 });
+
     if (element.lavelH <= siblingWithMaxLavelH.lavelH) {
       siblings.forEach(async (element1) => {
         if (element1.lavelH > element.lavelH) {
@@ -55,6 +68,7 @@ exports.create = async (req, res) => {
     });
   }
 };
+
 exports.createRoot = async (req, res) => {
   //input validation
   const { error } = xmlElementValidation(req.body);
@@ -72,6 +86,7 @@ exports.createRoot = async (req, res) => {
     }
     const root = await XmlElement.findOne({ parent_id: null });
     if (root) {
+      console.log(root);
       return res
         .status(404)
         .json({ success: false, message: " root Element is already Exist" });
@@ -115,6 +130,13 @@ exports.update = async (req, res) => {
         .send({ success: false, message: "Invalid ID format." });
     }
     const { name, type, is_attribute, lavelH } = req.body;
+    const query = await XmlElement.findById(req.params.id);
+    const itHasAttribute = hasAttributeFn(query.parent_id, query.schema_id);
+    if (is_attribute && itHasAttribute) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Already Have An Attribute" });
+    }
     const element = await XmlElement.findByIdAndUpdate(req.params.id, {
       name,
       type,
@@ -129,21 +151,42 @@ exports.update = async (req, res) => {
         .json({ success: false, message: "Element not found" });
     }
 
-    res.json({ success: true, data: element });
+    res.json({
+      success: true,
+      message: "element is  updated  succesfully .",
+      data: element,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
+const deleteElement = async (elementId) => {
+  try {
+    const element = await XmlElement.findById(elementId);
+    if (!element) {
+      return; // Element not found, exit recursion
+    }
+
+    const children = await XmlElement.find({ parent_id: element._id });
+
+    // Recursively delete children
+    for (const child of children) {
+      await deleteElement(child._id);
+    }
+
+    // Delete the current element
+    await XmlElement.findByIdAndDelete(elementId);
+  } catch (error) {
+    // Handle any errors here
+    console.error(`Error deleting element: ${error}`);
+  }
+};
 exports.delete = async (req, res) => {
   try {
-    const element = await XmlElement.findByIdAndDelete(req.params.id);
-    if (!element) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Element not found" });
-    }
-    res.json({ success: true, message: "Element is Deleted" });
+    const elementId = req.params.id;
+    await deleteElement(elementId);
+    res.json({ success: true, message: "Element is deleted successfully" });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -160,10 +203,6 @@ const getChildrensRecursive = async (elementId) => {
     parent_id: elementId,
   }).sort({ lavelH: 1 });
 
-  const attribute = await XmlElement.findOne({
-    parent_id: elementId,
-    is_attribute: 1,
-  });
   for (const element of subElements) {
     const child = await getChildrensRecursive(element._id);
     if (child) {
@@ -171,7 +210,7 @@ const getChildrensRecursive = async (elementId) => {
     }
   }
 
-  return { ...element.toObject(), childrens, attribute };
+  return { ...element.toObject(), childrens };
 };
 exports.subElements = async (req, res) => {
   if (!isValidObjectId(req.params.id)) {
@@ -190,4 +229,17 @@ exports.subElements = async (req, res) => {
   } else {
     res.status(404).send({ success: false, message: "Parent not found." });
   }
+};
+
+const hasAttributeFn = async (parent_id, schema_id) => {
+  const hasAttribute = await XmlElement.find({
+    is_attribute: 1,
+    parent_id: parent_id,
+    schema_id: schema_id,
+  });
+  console.log(hasAttribute.length);
+  if (hasAttribute.length >= 1) {
+    return true;
+  }
+  return false;
 };
