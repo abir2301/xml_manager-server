@@ -69,50 +69,6 @@ exports.create = async (req, res) => {
   }
 };
 
-exports.createRoot = async (req, res) => {
-  //input validation
-  const { error } = xmlElementValidation(req.body);
-  if (error) {
-    return error.details[0].message;
-  }
-
-  try {
-    const schema = await FileSchema.findOne({ _id: req.params.id });
-    console.log(schema);
-    if (!schema) {
-      return res
-        .status(404)
-        .json({ success: false, message: " Schema Not Found" });
-    }
-    const root = await XmlElement.findOne({ parent_id: null });
-    if (root) {
-      console.log(root);
-      return res
-        .status(404)
-        .json({ success: false, message: " root Element is already Exist" });
-    }
-
-    const element = await XmlElement.create({
-      name: req.body.name,
-      type: req.body.type,
-      is_attribute: false,
-      schema_id: schema._id,
-      parent_id: null,
-      lavelH: 0,
-    });
-    res.status(200).send({
-      success: true,
-      message: " Root Element is  Created  Succesfully .",
-      data: element,
-    });
-  } catch {
-    res.status(500).send({
-      success: false,
-      error: "some error occure while creating new rootElement .",
-    });
-  }
-};
-
 exports.getAll = async (req, res) => {
   const elements = await XmlElement.find();
   res.send({

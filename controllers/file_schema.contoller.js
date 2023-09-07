@@ -7,14 +7,41 @@ const fs = require("fs");
 const { isValidObjectId, Types } = require("mongoose");
 
 exports.create = async (req, res) => {
-  const schemaX = await FileSchema.create({ title: req.body.title });
-  res
-    .send({
-      success: true,
-      message: "schema  is  created  succesfully .",
-      data: schemaX,
-    })
-    .status(200);
+  try {
+    const exist = await FileSchema.findOne({ title: req.body.title });
+    if (exist) {
+      res
+        .send({
+          success: true,
+          message: "Already exist a schema with the same name .",
+          data: schema,
+        })
+        .status(401);
+    }
+    const schema = await FileSchema.create({ title: req.body.title });
+
+    const root = await XmlElement.create({
+      name: "root",
+      type: "root",
+      is_attribute: false,
+      schema_id: schema._id,
+      parent_id: null,
+      lavelH: 0,
+    });
+    if (root && schema)
+      res
+        .send({
+          success: true,
+          message: "schema  is  created  succesfully .",
+          data: schema,
+        })
+        .status(200);
+  } catch {
+    res.status(500).send({
+      success: false,
+      error: "some error occure while creating new rootElement .",
+    });
+  }
 };
 const getSchemaComposition = async (param) => {
   const schema = await FileSchema.findOne({ _id: param._id });
@@ -33,6 +60,7 @@ const getSchemaComposition = async (param) => {
   // const xmlData = convertToXml(composition);
   return { composition };
 };
+
 exports.getAll = async (req, res) => {
   const schemas = await FileSchema.find();
   const list = [];
@@ -57,6 +85,7 @@ exports.getAll = async (req, res) => {
     })
     .status(200);
 };
+
 const getSchemaElementsRecursive = async (elementId) => {
   const element = await XmlElement.findOne({ _id: elementId });
   if (!element) {
@@ -143,7 +172,11 @@ exports.update = async (req, res) => {
         .json({ success: false, message: "schema not found" });
     }
 
-    res.json({ success: true, data: schema });
+    res.json({
+      success: true,
+      message: "schema is updated successfully ",
+      data: schema,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -157,7 +190,7 @@ exports.delete = async (req, res) => {
         .json({ success: false, message: "schema not found" });
     }
 
-    res.json({ success: true, message: "schema is Deleted" });
+    res.json({ success: true, message: "schema is Deleted successfully " });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
