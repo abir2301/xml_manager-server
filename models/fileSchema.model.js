@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./user.model");
 const joi = require("joi");
 const { XmlElement } = require("./element.model");
 const schema = mongoose.Schema({
@@ -9,6 +10,12 @@ const schema = mongoose.Schema({
   version: {
     type: Number,
     default: 1,
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: false,
+    default: null,
   },
 });
 

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const XmlElement = require("./routes/xml_element.router");
 const FileSchema = require("./routes/file_schema.router");
+const User = require("./routes/user.route");
 const app = new express();
 require("dotenv").config();
 app.use(bodyParser.json());
@@ -21,6 +22,8 @@ app.listen(3002, () => {
 //`${process.env.API}/${process.env.XML_ELEMENT}`  not found
 app.use("/api/xml_element", XmlElement);
 app.use("/api/file_schema", FileSchema);
+app.use("/api/xsdFiles", express.static("xsdFiles"));
+app.use("/api/user", User);
 mongoose
   .connect("mongodb://127.0.0.1:27017/xml_manager")
   .then(() => {

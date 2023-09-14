@@ -1,6 +1,10 @@
 const { default: mongoose } = require("mongoose");
+const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
-const { XmlElement, xmlElementValidation } = require("../models/element.model");
+const {
+  getAllSchemas,
+  getSchemaById,
+} = require("../utilities/schema.services");
 require("dotenv").config();
 const joi = require("joi");
 const { isValidObjectId, Types } = require("mongoose");
@@ -25,11 +29,11 @@ exports.create = async (req, res) => {
     }).sort({ lavelH: 1 });
 
     if (req.body.is_attribute) {
-      const bool = await hasAttributeFn(parent._id, schema._id);
+      const bool = await hasAttributeFn(parent._id, schema._id, null);
       console.log("boooool" + bool);
       if (bool) {
         return res
-          .status(404)
+          .status(400)
           .json({ success: false, message: "Already Have An Attribute" });
       }
     }
@@ -56,15 +60,17 @@ exports.create = async (req, res) => {
         }
       });
     }
+
     res.status(200).send({
       success: true,
       message: "element is  created  succesfully .",
-      data: element,
+      data: await getSchemaById(schema._id),
     });
-  } catch {
+  } catch (error) {
+    console.log(error);
     res.status(500).send({
       success: false,
-      error: "some error occure while creating new rootElement .",
+      error: "some error occure while creating new Element .",
     });
   }
 };
@@ -87,10 +93,15 @@ exports.update = async (req, res) => {
     }
     const { name, type, is_attribute, lavelH } = req.body;
     const query = await XmlElement.findById(req.params.id);
-    const itHasAttribute = hasAttributeFn(query.parent_id, query.schema_id);
+    const itHasAttribute = await checkIfHasAttributeFn(
+      query.parent_id,
+      query.schema_id,
+      req.params.id
+    );
+    console.log("hasAtribute  " + itHasAttribute);
     if (is_attribute && itHasAttribute) {
       return res
-        .status(404)
+        .status(400)
         .json({ success: false, message: "Already Have An Attribute" });
     }
     const element = await XmlElement.findByIdAndUpdate(req.params.id, {
@@ -110,10 +121,10 @@ exports.update = async (req, res) => {
     res.json({
       success: true,
       message: "element is  updated  succesfully .",
-      data: element,
+      data: await getSchemaById(element.schema_id),
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: error });
   }
 };
 
@@ -141,8 +152,13 @@ const deleteElement = async (elementId) => {
 exports.delete = async (req, res) => {
   try {
     const elementId = req.params.id;
+    const element = await XmlElement.findById(req.params.id);
     await deleteElement(elementId);
-    res.json({ success: true, message: "Element is deleted successfully" });
+    res.json({
+      success: true,
+      message: "Element is deleted successfully",
+      data: await getSchemaById(element.schema_id),
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
@@ -193,8 +209,22 @@ const hasAttributeFn = async (parent_id, schema_id) => {
     parent_id: parent_id,
     schema_id: schema_id,
   });
-  console.log(hasAttribute.length);
+  console.log(hasAttribute);
   if (hasAttribute.length >= 1) {
+    return true;
+  }
+  return false;
+};
+
+const checkIfHasAttributeFn = async (parent_id, schema_id, _id) => {
+  const hasAttribute = await XmlElement.findOne({
+    is_attribute: 1,
+    parent_id: parent_id,
+    schema_id: schema_id,
+    _id: { $ne: _id },
+  });
+  console.log(hasAttribute);
+  if (hasAttribute) {
     return true;
   }
   return false;

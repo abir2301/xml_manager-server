@@ -1,6 +1,10 @@
 const { default: mongoose } = require("mongoose");
 const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
+const {
+  getAllSchemas,
+  getSchemaById,
+} = require("../utilities/schema.services");
 require("dotenv").config();
 const { create } = require("xmlbuilder2");
 const fs = require("fs");
@@ -10,13 +14,11 @@ exports.create = async (req, res) => {
   try {
     const exist = await FileSchema.findOne({ title: req.body.title });
     if (exist) {
-      res
-        .send({
-          success: true,
-          message: "Already exist a schema with the same name .",
-          data: schema,
-        })
-        .status(401);
+      return res.status(409).send({
+        success: false,
+        message: "Already exist a schema with the same name .",
+        data: exist,
+      });
     }
     const schema = await FileSchema.create({ title: req.body.title });
 
@@ -28,18 +30,16 @@ exports.create = async (req, res) => {
       parent_id: null,
       lavelH: 0,
     });
-    if (root && schema)
-      res
-        .send({
-          success: true,
-          message: "schema  is  created  succesfully .",
-          data: schema,
-        })
-        .status(200);
-  } catch {
-    res.status(500).send({
+    if (root)
+      return res.status(200).send({
+        success: true,
+        message: "schema  is  created  succesfully .",
+        data: schema,
+      });
+  } catch (error) {
+    return res.status(500).send({
       success: false,
-      error: "some error occure while creating new rootElement .",
+      error: error,
     });
   }
 };
@@ -194,4 +194,49 @@ exports.delete = async (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
+};
+exports.SchemaFile = async (req, res) => {
+  // Create an XML builder
+  const schema = await getSchemaById(req.params.id);
+  const xml = create();
+
+  // Define the XML schema structure
+  const xsd = xml.ele("xs:schema", {
+    xmlns: "http://www.w3.org/2001/XMLSchema",
+  });
+
+  function convertToXML(parentElement, data) {
+    for (const item of data) {
+      const element = parentElement.ele("xs:element", { name: item.name });
+      if (item.childrens.length == 0) {
+        element.att("type", item.type);
+      }
+      // Handle attributes if needed
+      if (item.is_attribute) {
+        const attribute = parentElement.ele("xs:attribute", {
+          name: item.name,
+        });
+        attribute.att("type", item.type);
+      } else {
+        if (item.childrens.length >= 1) {
+          const complexType = element.ele("xs:complexType");
+          const sequence = complexType.ele("xs:sequence");
+
+          // Recursively add child elements
+          if (item.childrens && item.childrens.length > 0) {
+            convertToXML(sequence, item.childrens);
+          }
+        }
+      }
+    }
+  }
+
+  convertToXML(xsd, schema.data);
+
+  // Convert the XML builder to a string
+  const xsdString = xml.end({ prettyPrint: true });
+
+  const filePath = `xsdFiles/schema.xsd`;
+  fs.writeFileSync(filePath, xsdString, "utf-8");
+  return res.send({ success: true, message: "file uploaded " });
 };

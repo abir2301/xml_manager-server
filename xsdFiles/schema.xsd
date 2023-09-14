@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<xs:schema xmlns="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="root11.1.1">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="attribute" type="date"/>
+        <xs:attribute name="attribute" type="date"/>
+        <xs:element name="attribute" type="string"/>
+        <xs:element name="attri2">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="attri2.1" type="number"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
