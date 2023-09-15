@@ -5,7 +5,13 @@
       <xs:sequence>
         <xs:element name="attribute" type="date"/>
         <xs:attribute name="attribute" type="date"/>
-        <xs:element name="attribute" type="string"/>
+        <xs:element name="item">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="item1.1" type="number"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
         <xs:element name="attri2">
           <xs:complexType>
             <xs:sequence>
