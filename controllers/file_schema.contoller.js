@@ -12,7 +12,10 @@ const { isValidObjectId, Types } = require("mongoose");
 
 exports.create = async (req, res) => {
   try {
-    const exist = await FileSchema.findOne({ title: req.body.title });
+    const exist = await FileSchema.findOne({
+      title: req.body.title,
+      user: req.userId,
+    });
     if (exist) {
       return res.status(409).send({
         success: false,
@@ -20,8 +23,11 @@ exports.create = async (req, res) => {
         data: exist,
       });
     }
-    const schema = await FileSchema.create({ title: req.body.title });
-
+    const schema = await FileSchema.create({
+      title: req.body.title,
+      user: req.userId,
+    });
+    console.log(req.userId);
     const root = await XmlElement.create({
       name: "root",
       type: "root",
@@ -39,7 +45,7 @@ exports.create = async (req, res) => {
   } catch (error) {
     return res.status(500).send({
       success: false,
-      error: error,
+      message: error,
     });
   }
 };
@@ -62,7 +68,7 @@ const getSchemaComposition = async (param) => {
 };
 
 exports.getAll = async (req, res) => {
-  const schemas = await FileSchema.find();
+  const schemas = await FileSchema.find({ user: req.userId });
   const list = [];
   for (i = 0; i < schemas.length; i++) {
     const schema = schemas[i];
@@ -102,7 +108,6 @@ const getSchemaElementsRecursive = async (elementId) => {
       childrens.push(child);
     }
   }
-
   return { ...element.toObject(), childrens };
 };
 
@@ -197,7 +202,7 @@ exports.delete = async (req, res) => {
 };
 exports.SchemaFile = async (req, res) => {
   // Create an XML builder
-  const schema = await getSchemaById(req.params.id);
+  const schema = await getSchemaById(req.params.id, req.userId);
   const xml = create();
 
   // Define the XML schema structure
@@ -209,7 +214,12 @@ exports.SchemaFile = async (req, res) => {
     for (const item of data) {
       const element = parentElement.ele("xs:element", { name: item.name });
       if (item.childrens.length == 0) {
-        element.att("type", item.type);
+        element.att("type", "xs:" + item.type);
+      }
+      if (item.type === "list") {
+        element.att("type", item.childrens[0].name);
+        element.att("minOccurs", "0");
+        element.att("maxOccurs", "unbounded");
       }
       // Handle attributes if needed
       if (item.is_attribute) {
@@ -221,8 +231,6 @@ exports.SchemaFile = async (req, res) => {
         if (item.childrens.length >= 1) {
           const complexType = element.ele("xs:complexType");
           const sequence = complexType.ele("xs:sequence");
-
-          // Recursively add child elements
           if (item.childrens && item.childrens.length > 0) {
             convertToXML(sequence, item.childrens);
           }

@@ -3,9 +3,13 @@ const joi = require("joi");
 const { FileSchema } = require("./fileSchema.model");
 const { XmlElement } = require("./element.model");
 const schema = mongoose.Schema({
-  id_schema: {
+  name: {
+    type: String,
+    required: true,
+  },
+  schema: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "FileSchema", // Refer to the XmlElement model
+    ref: "FileSchema",
     required: true,
   },
 
@@ -19,10 +23,8 @@ const schema = mongoose.Schema({
         },
         value: {
           type: String,
-
           required: true,
         },
-        lavelH: Number,
       },
     ],
   },

@@ -38,8 +38,8 @@ const getSchemaComposition = async (param) => {
   // const xmlData = convertToXml(composition);
   return { composition };
 };
-const getAllSchemas = async () => {
-  const schemas = await FileSchema.find();
+const getAllSchemas = async (user) => {
+  const schemas = await FileSchema.find({ user: user });
   const list = [];
   for (i = 0; i < schemas.length; i++) {
     const schema = schemas[i];
@@ -59,7 +59,7 @@ const getAllSchemas = async () => {
 const getSchemaById = async (id) => {
   const schema = await FileSchema.findOne({ _id: id });
   if (!schema) {
-    res.status(404).send({ success: false, message: "Schema not found." });
+    return null;
   }
   const root = await XmlElement.findOne({
     schema_id: schema._id,

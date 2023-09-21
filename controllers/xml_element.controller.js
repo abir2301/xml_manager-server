@@ -1,10 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
-const {
-  getAllSchemas,
-  getSchemaById,
-} = require("../utilities/schema.services");
+const { getSchemaById } = require("../utilities/schema.services");
 require("dotenv").config();
 const joi = require("joi");
 const { isValidObjectId, Types } = require("mongoose");
@@ -23,10 +20,21 @@ exports.create = async (req, res) => {
         .status(404)
         .json({ success: false, message: " Parent Element not found" });
     }
-
+    if (parent.type == "string" || parent.type == "number") {
+      console.log(parent.type);
+      return res
+        .status(404)
+        .json({ success: false, message: "not allowed functionnality " });
+    }
     const siblings = await XmlElement.find({
       parent_id: parent._id,
     }).sort({ lavelH: 1 });
+
+    if (parent.type == "list" && siblings.length >= 1) {
+      return res
+        .send({ message: "unable to add element", success: false })
+        .status(409);
+    }
 
     if (req.body.is_attribute) {
       const bool = await hasAttributeFn(parent._id, schema._id, null);
@@ -61,14 +69,14 @@ exports.create = async (req, res) => {
       });
     }
 
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "element is  created  succesfully .",
       data: await getSchemaById(schema._id),
     });
   } catch (error) {
     console.log(error);
-    res.status(500).send({
+    return res.status(500).send({
       success: false,
       error: "some error occure while creating new Element .",
     });

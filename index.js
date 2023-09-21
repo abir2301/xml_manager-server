@@ -1,12 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors"); // Import the cors middleware
+
 const bodyParser = require("body-parser");
 const XmlElement = require("./routes/xml_element.router");
 const FileSchema = require("./routes/file_schema.router");
+const File = require("./routes/file.route");
 const User = require("./routes/user.route");
+const authenticate = require("./middleware/auth.middleware");
 const app = new express();
 require("dotenv").config();
 app.use(bodyParser.json());
+app.use(cors());
 app.get("/", (req, res) => {
   res.send(" heyy app ");
 });
@@ -21,6 +26,7 @@ app.listen(3002, () => {
 });
 //`${process.env.API}/${process.env.XML_ELEMENT}`  not found
 app.use("/api/xml_element", XmlElement);
+app.use("/api/file", authenticate, File);
 app.use("/api/file_schema", FileSchema);
 app.use("/api/xsdFiles", express.static("xsdFiles"));
 app.use("/api/user", User);

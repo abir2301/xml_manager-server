@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
 <xs:schema xmlns="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="root11.1.1">
+  <xs:element name="root">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="attribute" type="date"/>
-        <xs:attribute name="attribute" type="date"/>
-        <xs:element name="item">
+        <xs:element name="fields" type="field" minOccurs="0" maxOccurs="unbounded">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="item1.1" type="number"/>
-            </xs:sequence>
-          </xs:complexType>
-        </xs:element>
-        <xs:element name="attri2">
-          <xs:complexType>
-            <xs:sequence>
-              <xs:element name="attri2.1" type="number"/>
+              <xs:element name="field">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="name" type="xs:string"/>
+                    <xs:element name="content" type="xs:complex"/>
+                    <xs:element name="image" type="xs:string"/>
+                    <xs:element name="id" type="xs:number"/>
+                    <xs:attribute name="id" type="number"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
