@@ -19,7 +19,6 @@ const elementSchema = mongoose.Schema({
     ref: "XmlElement",
     required: false,
   },
-
   schema_id: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "FileSchemas",
@@ -34,6 +33,10 @@ const elementSchema = mongoose.Schema({
     type: Number,
     required: false,
     default: 1,
+  },
+  value: {
+    type: String,
+    default: null,
   },
 });
 function xmlElementValidation(element) {

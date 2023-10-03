@@ -77,15 +77,28 @@ const connectedUser = async (req, res) => {
     message: "not found user",
   });
 };
-const getAllUsers = async (req, res) => {
+const getUser = async (req, res) => {
   const user_id = req.userId;
-  const users = await User.find();
+  try {
+    const user = await User.findById(user_id);
 
-  return res.status(404).json({
-    success: true,
-    message: "all users",
-    data: users,
-  });
+    if (user) {
+      return res.status(200).json({
+        success: true,
+        message: "connected user ",
+        data: user,
+      });
+    } else {
+      return res.status(404).json({
+        success: false,
+        message: "not found user ",
+      });
+    }
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ succes: false, message: "Internal server error" });
+  }
 };
 const updateProfile = async (req, res) => {
   const user_id = req.userId;
@@ -100,7 +113,7 @@ const updateProfile = async (req, res) => {
       });
     }
     const userWithEmail = await User.findOne({ email: req.body.email });
-    if (userWithEmail) {
+    if (userWithEmail && userWithEmail._id == user._id) {
       return res
         .status(409)
         .json({ succes: false, message: "email already exists" });
@@ -114,7 +127,7 @@ const updateProfile = async (req, res) => {
     await user.save();
 
     return res.status(200).json({
-      succes: true,
+      success: true,
       data: user,
       message: "Profile updated successfully",
     });
@@ -129,6 +142,6 @@ module.exports = {
   register,
   login,
   connectedUser,
-  getAllUsers,
+  getUser,
   updateProfile,
 };

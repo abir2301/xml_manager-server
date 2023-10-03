@@ -4,9 +4,9 @@ const element = require("../controllers/xml_element.controller");
 const authenticate = require("../middleware/auth.middleware");
 
 router.post("/:id", element.create);
+router.post("value/:id", element.assignValue);
 router.get("/:id", element.subElements);
 router.get("/", element.getAll);
-
 router.delete("/:id", element.delete);
 router.put("/:id", element.update);
 

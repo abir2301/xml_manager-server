@@ -237,3 +237,25 @@ const checkIfHasAttributeFn = async (parent_id, schema_id, _id) => {
   }
   return false;
 };
+
+exports.assignValue = async (req, res) => {
+  if (!isValidObjectId(req.params.id)) {
+    return res
+      .status(400)
+      .send({ success: false, message: "Invalid ID format." });
+  }
+  const node = await XmlElement.findOne({ _id: req.params.id });
+  if (node) {
+    node.value = req.body.value;
+    await node.save();
+    const file = await FileSchema.findById(node.schema_id);
+    console.log(childrens);
+    res.send({
+      success: true,
+      message: "add value",
+      data: getSchemaById(file._id),
+    });
+  } else {
+    res.status(404).send({ success: false, message: "Parent not found." });
+  }
+};

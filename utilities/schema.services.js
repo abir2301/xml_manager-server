@@ -55,6 +55,24 @@ const getAllSchemas = async (user) => {
   }
   return list;
 };
+const getAllFiles = async (user) => {
+  const schemas = await FileSchema.find({ user: user, isFile: true });
+  const list = [];
+  for (i = 0; i < schemas.length; i++) {
+    const schema = schemas[i];
+    const content = await getSchemaComposition(schema);
+    const obj = {
+      _id: schema._id,
+      title: schema.title,
+      isFile: schema.isFile,
+      version: schema.version,
+      data: [content.composition],
+    };
+
+    list.push(obj);
+  }
+  return list;
+};
 
 const getSchemaById = async (id) => {
   const schema = await FileSchema.findOne({ _id: id });
@@ -78,7 +96,33 @@ const getSchemaById = async (id) => {
     data: [composition],
   };
 };
+const createCopies = async (id_parent, childrens, file_id) => {
+  if (childrens.length == 0) return null;
+  childrens.map(async (child) => {
+    try {
+      const node = await XmlElement.create({
+        name: child.name,
+        type: child.type,
+        parent_id: id_parent,
+        schema_id: file_id,
+        is_attribute: child.is_attribute,
+        lavelH: child.lavelH,
+        value: null,
+      });
+      console.log(node);
+      if (child.childrens.length >= 1) {
+        createCopies(node.id, child.childrens, file_id);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  return null;
+};
+
 module.exports = {
   getAllSchemas,
   getSchemaById,
+  createCopies,
+  getAllFiles,
 };

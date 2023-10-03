@@ -68,13 +68,14 @@ const getSchemaComposition = async (param) => {
 };
 
 exports.getAll = async (req, res) => {
-  const schemas = await FileSchema.find({ user: req.userId });
+  const schemas = await FileSchema.find({ user: req.userId, isFile: false });
   const list = [];
   for (i = 0; i < schemas.length; i++) {
     const schema = schemas[i];
     const content = await getSchemaComposition(schema);
     const obj = {
       _id: schema._id,
+      isFile: schema.isFile,
       title: schema.title,
       version: schema.version,
       data: [content.composition],
@@ -212,22 +213,24 @@ exports.SchemaFile = async (req, res) => {
 
   function convertToXML(parentElement, data) {
     for (const item of data) {
-      const element = parentElement.ele("xs:element", { name: item.name });
-      if (item.childrens.length == 0) {
-        element.att("type", "xs:" + item.type);
-      }
-      if (item.type === "list") {
-        element.att("type", item.childrens[0].name);
-        element.att("minOccurs", "0");
-        element.att("maxOccurs", "unbounded");
-      }
-      // Handle attributes if needed
       if (item.is_attribute) {
         const attribute = parentElement.ele("xs:attribute", {
           name: item.name,
         });
-        attribute.att("type", item.type);
+        attribute.att("type", "xs:" + item.type);
       } else {
+        const element = parentElement.ele("xs:element", { name: item.name });
+        if (item.childrens.length == 0) {
+          element.att("type", "xs:" + item.type);
+        }
+        if (item.type === "list") {
+          element.att("type", item.childrens[0].name);
+          element.att("minOccurs", "0");
+          element.att("maxOccurs", "unbounded");
+        }
+
+        // Handle attributes if needed
+
         if (item.childrens.length >= 1) {
           const complexType = element.ele("xs:complexType");
           const sequence = complexType.ele("xs:sequence");

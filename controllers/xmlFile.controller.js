@@ -3,13 +3,15 @@ const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
 const { File } = require("../models/file.model");
 const {
-  getAllSchemas,
+  getAllFiles,
+  createCopies,
   getSchemaById,
 } = require("../utilities/schema.services");
 require("dotenv").config();
 const { create } = require("xmlbuilder2");
 const fs = require("fs");
 const { isValidObjectId, Types } = require("mongoose");
+const { createGunzip } = require("zlib");
 
 exports.create = async (req, res) => {
   try {
@@ -19,14 +21,29 @@ exports.create = async (req, res) => {
         .status(409)
         .json({ succes: false, message: "file  Already exists " });
     } else {
-      const file = await File.create({
-        name: req.body.name,
-        schema: schema._id,
+      const file = await FileSchema.create({
+        title: req.body.title,
+        isFile: true,
+        user: req.userId,
       });
+
+      const composition = await getSchemaById(schema._id);
+      const schemaRoot = composition.data[0];
+      const root = await XmlElement.create({
+        name: schemaRoot.name,
+        type: schemaRoot.type,
+        parent_id: null,
+        schema_id: file._id,
+        is_attribute: false,
+      });
+
+      await createCopies(root._id, composition.data[0].childrens, file._id);
+
+      const fileComp = await getSchemaById(file._id);
       return res.status(200).send({
-        succes: true,
+        success: true,
         message: "file is creates succesfully",
-        data: file,
+        data: fileComp,
       });
     }
   } catch (error) {
@@ -43,9 +60,9 @@ exports.update = async (req, res) => {
         .status(400)
         .send({ success: false, message: "Invalid ID format." });
     }
-    const { name } = req.body;
-    const file = await File.findByIdAndUpdate(req.params.id, {
-      name,
+    const { title } = req.body;
+    const file = await FileSchema.findByIdAndUpdate(req.params.id, {
+      title,
     });
 
     file.save();
@@ -56,38 +73,75 @@ exports.update = async (req, res) => {
         .json({ success: false, message: "file not found" });
     }
 
-    return res.json({
-      success: true,
-      message: "file is updated successfully ",
-      data: file,
-    });
+    return res
+      .json({
+        success: true,
+        message: "file is updated successfully ",
+        data: await getAllFiles(req.userId),
+      })
+      .status(200);
   } catch (error) {
     res.status(500).json({ success: false, message: "Server error" });
   }
 };
 exports.delete = async (req, res) => {
   try {
-    const file = await File.findByIdAndDelete(req.params.id);
+    const file = await FileSchema.findByIdAndDelete(req.params.id);
+    console.log("file");
+
     if (!file) {
       return res
         .status(404)
         .json({ success: false, message: "file not found" });
     }
-
-    return res.json({
-      success: true,
-      message: "file is Deleted successfully ",
-    });
+    return res
+      .send({
+        success: true,
+        message: "file is Deleted successfully ",
+        data: await getAllFiles(req.userId),
+      })
+      .status(200);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).send({ success: false, message: "Server error" });
   }
 };
 exports.getAll = async (req, res) => {
   try {
-    const files = await File.find();
-
-    res.json({ success: true, message: "files ", data: files });
+    return res
+      .send({
+        success: true,
+        message: "schemas",
+        data: await getAllFiles(req.userId),
+      })
+      .status(200);
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error" });
+    res.status(500).json({ success: false, message: error });
+  }
+};
+exports.addXmlNode = async (req, res) => {
+  const file = await File.findById(req.body.file);
+  const node = await XmlElement.findById(req.params.id);
+  if (!node) {
+    return res
+      .status(404)
+      .json({ success: false, message: " Node  Not Found" });
+  }
+  if (!file) {
+    return res
+      .status(404)
+      .json({ success: false, message: " File  Not Found" });
+  }
+  if (node.type !== "list" && node.type !== "complexe") {
+    const composite = {
+      id_element: node._id,
+      value: req.body.value,
+    };
+    file.composition.push(composite);
+    await file.save();
+    return res.status(200).send({
+      success: true,
+      message: "value is  added   succesfully .",
+      data: file,
+    });
   }
 };

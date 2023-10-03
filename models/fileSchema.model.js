@@ -16,6 +16,11 @@ const schema = mongoose.Schema({
     ref: "User",
     required: true,
   },
+  isFile: {
+    type: Boolean,
+    default: false,
+    required: false,
+  },
 });
 
 const FileSchema = mongoose.model("fileSchemas", schema);
