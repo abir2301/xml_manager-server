@@ -29,6 +29,8 @@ app.use("/api/xml_element", XmlElement);
 app.use("/api/file", authenticate, File);
 app.use("/api/file_schema", FileSchema);
 app.use("/api/xsdFiles", express.static("xsdFiles"));
+app.use("/api/xmlFiles", express.static("xmlFiles"));
+
 app.use("/api/user", User);
 mongoose
   .connect("mongodb://127.0.0.1:27017/xml_manager")

@@ -220,21 +220,28 @@ exports.SchemaFile = async (req, res) => {
         attribute.att("type", "xs:" + item.type);
       } else {
         const element = parentElement.ele("xs:element", { name: item.name });
-        if (item.childrens.length == 0) {
+        if (item.childrens.length == 0 && item.type != "complex") {
           element.att("type", "xs:" + item.type);
         }
         if (item.type === "list") {
-          element.att("type", item.childrens[0].name);
+          element.att(
+            "type",
+            item.childrens[0] ? item.childrens[0].name : "list"
+          );
           element.att("minOccurs", "0");
           element.att("maxOccurs", "unbounded");
         }
 
         // Handle attributes if needed
 
-        if (item.childrens.length >= 1) {
+        if (
+          (item.type == "complex" && item.childrens.length >= 0) ||
+          item.childrens.length >= 1
+        ) {
+          console.log(item.name);
           const complexType = element.ele("xs:complexType");
           const sequence = complexType.ele("xs:sequence");
-          if (item.childrens && item.childrens.length > 0) {
+          if (item.childrens && item.childrens.length >= 0) {
             convertToXML(sequence, item.childrens);
           }
         }

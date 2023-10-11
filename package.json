@@ -21,6 +21,7 @@
     "mongoose": "^7.4.0",
     "nodemon": "^3.0.1",
     "xml-js": "^1.6.11",
+    "xmlbuilder": "^15.1.1",
     "xmlbuilder2": "^3.1.1"
   }
 }

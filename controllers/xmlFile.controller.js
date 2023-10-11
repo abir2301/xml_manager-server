@@ -6,10 +6,12 @@ const {
   getAllFiles,
   createCopies,
   getSchemaById,
+  getFileByID,
 } = require("../utilities/schema.services");
 require("dotenv").config();
 const { create } = require("xmlbuilder2");
 const fs = require("fs");
+const xmlbuilder = require("xmlbuilder");
 const { isValidObjectId, Types } = require("mongoose");
 const { createGunzip } = require("zlib");
 
@@ -118,6 +120,19 @@ exports.getAll = async (req, res) => {
     res.status(500).json({ success: false, message: error });
   }
 };
+exports.getAllNames = async (req, res) => {
+  try {
+    return res
+      .send({
+        success: true,
+        message: "schemas",
+        data: (await getAllFiles(req.userId)).length,
+      })
+      .status(200);
+  } catch (error) {
+    res.status(500).json({ success: false, message: error });
+  }
+};
 exports.addXmlNode = async (req, res) => {
   const file = await File.findById(req.body.file);
   const node = await XmlElement.findById(req.params.id);
@@ -144,4 +159,45 @@ exports.addXmlNode = async (req, res) => {
       data: file,
     });
   }
+};
+
+exports.xmlFile = async (req, res) => {
+  const file = await getFileByID(req.params.id);
+
+  const root = xmlbuilder.create("xml");
+
+  function addElements(xmlNode, data) {
+    data.forEach((item) => {
+      const child = xmlNode.ele(item.name);
+
+      // Check if item has attributes and add them
+      if (item.attribute && item.attribute._id) {
+        child.att(item.attribute.name, item.attribute.value || "");
+      }
+
+      // Check if item has a value and add it
+      if (item.value !== null) {
+        child.txt(item.value);
+      } else {
+        child.txt("empty");
+      }
+
+      // If item has children, recurse
+      if (item.childrens.length > 0) {
+        addElements(child, item.childrens);
+      }
+    });
+  }
+  addElements(root, file.data);
+
+  // Convert the XML to a string
+  const xmlString = root.end({ pretty: true });
+
+  // Write the XML content to a file
+  const fileName = "xmlFiles/output.xml";
+  fs.writeFileSync(fileName, xmlString);
+
+  return res
+    .send({ success: true, message: "file uploaded ", data: file })
+    .status(200);
 };

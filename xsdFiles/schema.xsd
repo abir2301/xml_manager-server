@@ -9,30 +9,21 @@
               <xs:element name="order">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="date" type="xs:date"/>
-                    <xs:element name="client">
-                      <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="name" type="xs:string"/>
-                          <xs:element name="age" type="xs:number"/>
-                        </xs:sequence>
-                      </xs:complexType>
-                    </xs:element>
-                    <xs:attribute name="id" type="xs:number"/>
+                    <xs:element name="quantity" type="xs:number"/>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
           </xs:complexType>
         </xs:element>
-        <xs:element name="fournisseurs" type="fournisseur" minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="users" type="user" minOccurs="0" maxOccurs="unbounded">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="fournisseur">
+              <xs:element name="user">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="name" type="xs:string"/>
-                    <xs:attribute name="id" type="xs:number"/>
+                    <xs:element name="name" type="xs:text"/>
+                    <xs:element name="age" type="xs:date"/>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>

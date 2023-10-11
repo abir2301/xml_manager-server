@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<xml>
+  <root>
+    empty
+    <orders>
+      empty
+      <order>
+        empty
+        <quantity>6</quantity>
+      </order>
+      <order>
+        empty
+        <quantity>4</quantity>
+      </order>
+    </orders>
+    <users>
+      empty
+      <user>
+        empty
+        <name>empty</name>
+        <age>empty</age>
+      </user>
+    </users>
+  </root>
+</xml>

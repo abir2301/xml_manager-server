@@ -1,7 +1,12 @@
 const { default: mongoose } = require("mongoose");
 const { XmlElement } = require("../models/element.model");
 const { FileSchema } = require("../models/fileSchema.model");
-const { getSchemaById } = require("../utilities/schema.services");
+const {
+  getSchemaById,
+  createCopies,
+  getAllFiles,
+  getFileByID,
+} = require("../utilities/schema.services");
 require("dotenv").config();
 const joi = require("joi");
 const { isValidObjectId, Types } = require("mongoose");
@@ -182,6 +187,7 @@ const getChildrensRecursive = async (elementId) => {
   const subElements = await XmlElement.find({
     parent_id: elementId,
   }).sort({ lavelH: 1 });
+  let attribute = {};
 
   for (const element of subElements) {
     const child = await getChildrensRecursive(element._id);
@@ -189,7 +195,6 @@ const getChildrensRecursive = async (elementId) => {
       childrens.push(child);
     }
   }
-
   return { ...element.toObject(), childrens };
 };
 exports.subElements = async (req, res) => {
@@ -201,13 +206,19 @@ exports.subElements = async (req, res) => {
   const parent = await XmlElement.findOne({ _id: req.params.id });
   if (parent) {
     const childrens = await getChildrensRecursive(parent._id);
-    console.log(childrens);
-    res.send({
-      success: true,
-      data: childrens,
-    });
+    console.log(req.body);
+    await createCopies(parent._id, [childrens.childrens[0]], req.body.file);
+    console.log("complete");
+    return res
+      .send({
+        success: true,
+        data: await getFileByID(req.userId, parent.schema_id),
+      })
+      .status(200);
   } else {
-    res.status(404).send({ success: false, message: "Parent not found." });
+    return res
+      .status(404)
+      .send({ success: false, message: "Parent not found." });
   }
 };
 
@@ -249,12 +260,14 @@ exports.assignValue = async (req, res) => {
     node.value = req.body.value;
     await node.save();
     const file = await FileSchema.findById(node.schema_id);
-    console.log(childrens);
-    res.send({
-      success: true,
-      message: "add value",
-      data: getSchemaById(file._id),
-    });
+    if (file) {
+      return res.send({
+        success: true,
+        message: "post Value",
+        data: await getSchemaById(file._id),
+      });
+    }
+    return res.status(404).send({ success: false, message: "file not found." });
   } else {
     res.status(404).send({ success: false, message: "Parent not found." });
   }
