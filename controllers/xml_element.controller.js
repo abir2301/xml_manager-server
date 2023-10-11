@@ -212,7 +212,7 @@ exports.subElements = async (req, res) => {
     return res
       .send({
         success: true,
-        data: await getFileByID(req.userId, parent.schema_id),
+        data: await getFileByID(parent.schema_id),
       })
       .status(200);
   } else {
@@ -264,7 +264,7 @@ exports.assignValue = async (req, res) => {
       return res.send({
         success: true,
         message: "post Value",
-        data: await getSchemaById(file._id),
+        data: await getFileByID(file._id),
       });
     }
     return res.status(404).send({ success: false, message: "file not found." });

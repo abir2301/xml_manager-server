@@ -10,6 +10,8 @@ router.delete("/:id", authenticate, File.delete);
 router.put("/:id", authenticate, File.update);
 router.get("/name", authenticate, File.getAllNames);
 
+router.get("/:id", authenticate, File.getFile);
+
 router.get("/", authenticate, File.getAll);
 
 module.exports = router;

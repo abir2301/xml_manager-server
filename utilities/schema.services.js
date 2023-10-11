@@ -11,17 +11,40 @@ const getSchemaElementsRecursive = async (elementId) => {
   const subElements = await XmlElement.find({
     parent_id: elementId,
   }).sort({ lavelH: 1 });
+
+  for (const element of subElements) {
+    const child = await getSchemaElementsRecursive(element._id);
+    if (child != null) {
+      childrens.push(child);
+    }
+  }
+  return { ...element.toObject(), childrens };
+};
+const getFileElementsRecursive = async (elementId) => {
+  const element = await XmlElement.findOne({ _id: elementId });
+  if (!element) {
+    return null;
+  }
+  const childrens = [];
+
+  const subElements = await XmlElement.find({
+    parent_id: elementId,
+  }).sort({ lavelH: 1 });
   let attribute = {};
+  console.log("subElements");
+  console.log(subElements);
   for (const element of subElements) {
     if (element.is_attribute !== true) {
-      const child = await getSchemaElementsRecursive(element._id);
+      const child = await getFileElementsRecursive(element._id);
       if (child != null) {
         childrens.push(child);
       }
     } else {
+      console.log("is attribute ");
       attribute = element;
     }
   }
+
   return { ...element.toObject(), childrens, attribute };
 };
 const getSchemaComposition = async (param) => {
@@ -41,11 +64,7 @@ const getSchemaComposition = async (param) => {
   // const xmlData = convertToXml(composition);
   return { composition };
 };
-const getSchemaAttribute = async (schema) => {
-  const file = await FileSchema.findOne({ _id: schema._id });
-  if (file) {
-  }
-};
+
 const getAllSchemas = async (user) => {
   const schemas = await FileSchema.find({ user: user });
   const list = [];
@@ -69,25 +88,32 @@ const getAllFiles = async (user) => {
   for (i = 0; i < schemas.length; i++) {
     const schema = schemas[i];
     const obj = await getFileByID(schema._id);
-    // const content = await getSchemaComposition(schema);
-
-    // const obj = {
-    //   _id: schema._id,
-    //   title: schema.title,
-    //   isFile: schema.isFile,
-    //   version: schema.version,
-    //   data: [content.composition],
-    // };
-
     list.push(obj);
   }
   return list;
 };
 
+const getFileComposition = async (param) => {
+  const schema = await FileSchema.findOne({ _id: param._id });
+  if (!schema) {
+    return {};
+  }
+  const root = await XmlElement.findOne({
+    schema_id: schema._id,
+    parent_id: null,
+  });
+  if (!root) {
+    return {};
+  }
+  const composition = await getFileElementsRecursive(root._id);
+  let data = JSON.stringify(composition);
+  // const xmlData = convertToXml(composition);
+  return { composition };
+};
 const getFileByID = async (id) => {
   const schema = await FileSchema.findById(id);
   if (schema) {
-    const content = await getSchemaComposition(schema);
+    const content = await getFileComposition(schema);
 
     const obj = {
       _id: schema._id,
@@ -125,8 +151,6 @@ const getSchemaById = async (id) => {
   };
 };
 const createCopies = async (id_parent, childrens, file_id) => {
-  // console.log("create coppies ");
-  // console.log(childrens);
   if (childrens.length == 0) return null;
   childrens.map(async (child) => {
     try {

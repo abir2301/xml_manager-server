@@ -1,29 +1,21 @@
 <?xml version="1.0"?>
 <xs:schema xmlns="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="root">
+  <xs:element name="aide">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="orders" type="order" minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Gpar">
           <xs:complexType>
-            <xs:sequence>
-              <xs:element name="order">
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:element name="quantity" type="xs:number"/>
-                  </xs:sequence>
-                </xs:complexType>
-              </xs:element>
-            </xs:sequence>
+            <xs:sequence/>
           </xs:complexType>
         </xs:element>
-        <xs:element name="users" type="user" minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Gserv">
           <xs:complexType>
             <xs:sequence>
-              <xs:element name="user">
+              <xs:element name="addS">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element name="name" type="xs:text"/>
-                    <xs:element name="age" type="xs:date"/>
+                    <xs:element name="desc" type="xs:text"/>
+                    <xs:element name="url" type="xs:url"/>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>

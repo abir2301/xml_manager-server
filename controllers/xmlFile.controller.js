@@ -15,6 +15,13 @@ const xmlbuilder = require("xmlbuilder");
 const { isValidObjectId, Types } = require("mongoose");
 const { createGunzip } = require("zlib");
 
+exports.getFile = async (req, res) => {
+  return res.send({
+    succes: true,
+    message: "get file by id",
+    data: await getSchemaById(req.params.id),
+  });
+};
 exports.create = async (req, res) => {
   try {
     const schema = await FileSchema.findById(req.params.id);
@@ -178,8 +185,6 @@ exports.xmlFile = async (req, res) => {
       // Check if item has a value and add it
       if (item.value !== null) {
         child.txt(item.value);
-      } else {
-        child.txt("empty");
       }
 
       // If item has children, recurse
